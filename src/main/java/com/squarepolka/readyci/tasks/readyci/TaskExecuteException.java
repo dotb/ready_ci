@@ -1,4 +1,4 @@
-package com.squarepolka.readyci.tasks;
+package com.squarepolka.readyci.tasks.readyci;
 
 public class TaskExecuteException extends RuntimeException {
 

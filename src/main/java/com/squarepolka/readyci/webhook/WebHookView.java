@@ -27,7 +27,7 @@ public class WebHookView {
         webHookPresenter.handleWebHook(webHookRequest);
 
         WebHookResponse webHookResponse = new WebHookResponse();
-        webHookResponse.message = "Thanks";
+        webHookResponse.setMessage("Thanks");
 
         return webHookResponse;
     }

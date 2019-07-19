@@ -4,6 +4,8 @@ import com.squarepolka.readyci.taskrunner.BuildEnvironment;
 import com.squarepolka.readyci.tasks.Task;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 @Component
@@ -18,14 +20,14 @@ public class IOSProvisioningProfileInstall extends Task {
 
     @Override
     public void performTask(BuildEnvironment buildEnvironment) {
-        List<String> relativeProfilePaths = buildEnvironment.getProperties(IOSProvisioningProfileRead.BUILD_PROP_PROFILE_PATHS);
-        for (String relativeProfilePath : relativeProfilePaths) {
-            installProfile(relativeProfilePath, buildEnvironment.projectPath);
+        List<LinkedHashMap<String, String>> relativeProfilePaths = buildEnvironment.getListOfHashMaps(IOSProvisioningProfileRead.BUILD_PROP_PROFILE_PATHS);
+        for (LinkedHashMap<String, String> relativeProfilePath : relativeProfilePaths) {
+            installProfile(relativeProfilePath, buildEnvironment.getProjectPath());
         }
     }
 
-    public void installProfile(String relativeProfilePath, String projectPath) {
-        String profilePath = String.format("%s/%s", projectPath, relativeProfilePath);
+    public void installProfile(HashMap<String, String> relativeProfilePath, String projectPath) {
+        String profilePath = String.format("%s/%s", projectPath, relativeProfilePath.get("profilePath"));
         executeCommand(new String[] {"/usr/bin/open", profilePath});
     }
 }

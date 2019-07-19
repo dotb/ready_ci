@@ -1,7 +1,8 @@
 package com.squarepolka.readyci.taskrunner;
 
+import com.squarepolka.readyci.exceptions.TaskExitException;
 import com.squarepolka.readyci.tasks.Task;
-import com.squarepolka.readyci.tasks.TaskExecuteException;
+import com.squarepolka.readyci.tasks.readyci.TaskExecuteException;
 import com.squarepolka.readyci.util.time.TaskTimer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,7 +14,7 @@ public class TaskRunner {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TaskRunner.class);
 
-    public TaskRunnerFactory taskRunnerFactory;
+    protected TaskRunnerFactory taskRunnerFactory;
     protected List<Task> defaultPreTasks;
     protected List<Task> defaultPostTasks;
     protected List<Task> configuredTasks;
@@ -45,14 +46,18 @@ public class TaskRunner {
 
     public void runAllTasks() {
         try {
-            LOGGER.info(String.format("EXECUTING\tBUILD\t%s\t(%s)", buildEnvironment.pipelineName, buildEnvironment.buildUUID));
+            LOGGER.info("EXECUTING\tBUILD\t{}\t({})", buildEnvironment.getPipelineName(), buildEnvironment.getBuildUUID());
             runTaskList(defaultPreTasks);
             checkThatTasksExist();
             runTaskList(configuredTasks);
             runTaskList(defaultPostTasks);
-            LOGGER.info(String.format("COMPLETED\tBUILD\t%s\t(%s)", buildEnvironment.pipelineName, buildEnvironment.buildUUID));
-        } catch (RuntimeException e) {
-            LOGGER.info(String.format("FAILED\tBUILD\t%s\t(%s)", buildEnvironment.pipelineName, buildEnvironment.buildUUID));
+            LOGGER.info("COMPLETED\tBUILD\t{}\t({})", buildEnvironment.getPipelineName(), buildEnvironment.getBuildUUID());
+        }
+        catch (TaskExitException e) {
+            LOGGER.info("EXITED\tBUILD\t{}\t({})\t{}", buildEnvironment.getPipelineName(), buildEnvironment.getBuildUUID(), e.getMessage());
+        }
+        catch (RuntimeException e) {
+            LOGGER.info("FAILED\tBUILD\t{}\t({})", buildEnvironment.getPipelineName(), buildEnvironment.getBuildUUID());
             throw e;
         }
     }
@@ -63,24 +68,24 @@ public class TaskRunner {
         }
     }
 
-    private void runTaskList(List<Task> tasks) {
+    private void runTaskList(List<Task> tasks) throws TaskExitException {
         for (Task task : tasks) {
             try {
-                task.taskRunner = this;
+                task.setTaskRunner(this);
                 runTask(task);
-                task.taskRunner = null;
-            } catch (Exception e) {
+                task.setTaskRunner(null);
+            } catch (TaskFailedException e) {
                 handleTaskFailure(task, e);
             }
         }
     }
 
-    private void runTask(Task task) throws Exception {
-        LOGGER.info(String.format("RUNNING\tTASK\t%s", task.taskIdentifier()));
+    private void runTask(Task task) throws TaskExitException {
+        LOGGER.info("RUNNING\tTASK\t{}", task.taskIdentifier());
         TaskTimer taskTimer = TaskTimer.newStartedTimer();
         task.performTask(buildEnvironment);
         String formattedTime = taskTimer.stopAndGetElapsedTime();
-        LOGGER.info(String.format("\t\t\tFINISHED IN %s", formattedTime));
+        LOGGER.info("\t\t\tFINISHED IN {}", formattedTime);
     }
 
     private void handleTaskFailure(Task task, Exception e) {
@@ -91,6 +96,10 @@ public class TaskRunner {
             taskExecuteException.setStackTrace(e.getStackTrace());
             throw taskExecuteException;
         }
+    }
+
+    public TaskRunnerFactory getTaskRunnerFactory() {
+        return taskRunnerFactory;
     }
 
 }

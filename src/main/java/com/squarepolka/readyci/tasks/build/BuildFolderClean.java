@@ -16,7 +16,7 @@ public class BuildFolderClean extends Task {
 
     @Override
     public void performTask(BuildEnvironment buildEnvironment) {
-        String buildPath = buildEnvironment.scratchPath;
+        String buildPath = buildEnvironment.getScratchPath();
 
         if (buildPath.length() > 12 && buildPath.startsWith("/tmp/readyci")) {
             executeCommand(new String[] {"rm", "-fR", buildPath});

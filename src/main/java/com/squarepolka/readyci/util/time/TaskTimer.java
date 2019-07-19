@@ -3,8 +3,8 @@ package com.squarepolka.readyci.util.time;
 import java.util.Calendar;
 
 public class TaskTimer {
-    public Calendar taskStartTime;
-    public Calendar taskEndTime;
+    private Calendar taskStartTime;
+    private Calendar taskEndTime;
 
     public static TaskTimer newStartedTimer() {
         TaskTimer taskTimer = new TaskTimer();

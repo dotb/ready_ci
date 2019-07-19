@@ -22,7 +22,7 @@ public class TimeUtilsTest {
 
     @Test
     public void convertMillisecondsToReadableTime() {
-        TimeUnit result = subject.convertMillisecondsToReadableTime(2000, 1000, TimeUtils.oneSecond);
-        assertEquals("Calculated time for seconds is correct", 1, result.calculatedTime);
+        TimeUnit result = subject.convertMillisecondsToReadableTime(2000, 1000, TimeUtils.TIME_SECOND_ONE);
+        assertEquals("Calculated time for seconds is correct", 1, result.getCalculatedTime());
     }
 }

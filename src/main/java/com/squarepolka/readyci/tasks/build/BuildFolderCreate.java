@@ -18,7 +18,7 @@ public class BuildFolderCreate extends Task {
 
     @Override
     public void performTask(BuildEnvironment buildEnvironment) {
-        String buildPath = buildEnvironment.scratchPath;
+        String buildPath = buildEnvironment.getScratchPath();
 
         StringBuilder pathStrBuilder = new StringBuilder();
         String[] pathFolders = buildPath.split("/");

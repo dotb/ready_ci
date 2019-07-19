@@ -3,6 +3,7 @@ package com.squarepolka.readyci.tasks.app.ios.provisioningprofile;
 import com.dd.plist.NSDictionary;
 import com.dd.plist.PropertyListParser;
 import com.squarepolka.readyci.taskrunner.BuildEnvironment;
+import com.squarepolka.readyci.taskrunner.TaskFailedException;
 import com.squarepolka.readyci.tasks.Task;
 import org.springframework.stereotype.Component;
 
@@ -21,12 +22,16 @@ public class IOSBuildExportOptionsCreate extends Task {
     }
 
     @Override
-    public void performTask(BuildEnvironment buildEnvironment) throws Exception {
-        String exportOptionsPath = String.format("%s/exportOptions.plist", buildEnvironment.scratchPath);
+    public void performTask(BuildEnvironment buildEnvironment) throws TaskFailedException {
+        String exportOptionsPath = String.format("%s/exportOptions.plist", buildEnvironment.getScratchPath());
         String devTeam = buildEnvironment.getProperty(IOSProvisioningProfileRead.BUILD_PROP_DEV_TEAM);
         String provisioningMethod = buildEnvironment.getProperty(IOSProvisioningProfileRead.BUILD_PROP_PROVISIONING_METHOD);
         List<Object> provisioningProfiles = buildEnvironment.getObjects(IOSProvisioningProfileRead.BUILD_PROP_IOS_PROFILES);
-        createExportOptionsFile(devTeam, exportOptionsPath, provisioningMethod, provisioningProfiles);
+        try {
+            createExportOptionsFile(devTeam, exportOptionsPath, provisioningMethod, provisioningProfiles);
+        } catch (IOException e) {
+            throw new TaskFailedException(e.getMessage());
+        }
     }
 
     private void createExportOptionsFile(String devTeam, String exportOptionsPath, String provisioningMethod, List<Object> provisioningProfiles) throws IOException {
@@ -42,7 +47,7 @@ public class IOSBuildExportOptionsCreate extends Task {
         NSDictionary provisioningProfilesDict = new NSDictionary();
         for (Object profileObject : provisioningProfiles) {
             ProvisioningProfile profile = (ProvisioningProfile) profileObject;
-            provisioningProfilesDict.put(profile.bundleId, profile.name);
+            provisioningProfilesDict.put(profile.getBundleId(), profile.getName());
         }
         rootDict.put("provisioningProfiles", provisioningProfilesDict);
 

@@ -1,0 +1,107 @@
+# Give your ReadyCI instance a name.
+instanceName: ReadyCI
+
+# Optional proxy configuration if you're behind a firewall/proxy.
+#proxyHost: <proxy.host.domain.com>
+#proxyPort: 80
+#proxyUsername: <optional username>
+#proxyPassword: <optional password>
+
+# You can specify a number of pipelines. Each needs a unique name.
+pipelines:
+
+# It's only fitting that our first pipeline builds ReadyCI!
+- name: readyci
+  parameters:
+    gitPath: https://github.com/DeloitteDigitalAPAC/readyci.git # The GIT url you wish to pull. This is not required if a CI server is pulling your code.
+    gitBranch: master # The branch you wish to pull. This is not required if a CI server is pulling your code.
+    deploySrcPath: target/readyci-0.6.1.jar # The path to the build binary.
+    deployDstPath: /tmp/ # The path to the destination binary.
+
+  tasks:
+  - task: maven_install # Run maven install.
+
+  - task: deploy_copy # Copy the built binary to a deployment destination.
+
+# The next pipeline builds an iOS app. Replace the parameters with values from your iOS XCode project.
+- name: build-an-ios-app
+  parameters:
+    gitPath: <git url> # The GIT url you wish to pull. This is not required if a CI server is pulling your code.
+    gitBranch: master # The branch you wish to pull. This is not required if a CI server is pulling your code.
+    projectPath: ios app # The path to you project if it is not in the root folder.
+    workspace: <workspace name> # The name of the XCode workspace file without the extension.
+    scheme: <target name> # Your scheme name specified in XCode.
+    configuration: Release # Your release configuration specified in XCode.
+    infoPlistPath: <path to Info.plist> # The path to your info.plist so that ReadyCI and bump the build number.
+    iosPodUpdateRepo: false # Choose to update the pod repo before pod install is run. Default is false.
+    hockappToken: <token> # This token is generated on Hockeyapp and is needed to provide authentication to upload builds.
+    hockeyappReleaseTags: <tags for release users or groups> # These tags specify which users are notified on Hockeyapp.
+    hockeyappReleaseNotes: New app build available # This text is populated in the Hockeyapp notification email.
+    iTunesUsername: <itunes upload username> # The iTunes credentials allow you to upload a build to App Store Connect.
+    iTunesPassword: <itunes upload password>
+    iosProfiles: # Specify a list of provisioning profiles to be loaded onto your CI server and kept up-to-date.
+    - <file 1>.mobileprovision
+    - <file 2>.mobileprovision
+
+  tasks:
+  - task: ios_pod_install # Runs pod install and pod repo update if iosPodUpdateRepo: true above.
+
+  - task: ios_provisioning_profile_read # Read the provisioning profile and add parameters to the build environment.
+
+  - task: ios_export_options_create # Create a exportOptions.plist file.
+
+  - task: ios_install_provisioning_profile # Install the provisioning profile in XCode.
+
+  - task: ios_archive # Generate an iOS archive.
+
+  - task: ios_export # Sign and export the iOS app.
+
+  - task: ios_upload_itunes_connect # Upload the binary to iTunes Connect.
+
+# This pipeline builds an Android app. Replace the parameters with values from our Android Studio project.
+- name: build-an-android-app
+  parameters:
+    gitPath: <git url> # The GIT url you wish to pull. This is not required if a CI server is pulling your code.
+    gitBranch: <branch> # The branch you wish to pull. This is not required if a CI server is pulling your code.
+    scheme: <target name> # Your scheme name specified in Android Studio.
+    hockappToken: <token> # This token is generated on Hockeyapp and is needed to provide authentication to upload builds.
+    hockeyappReleaseTags: <tags for release users or groups> # These tags specify which users are notified on Hockeyapp.
+    hockeyappReleaseNotes: New app build available # This text is populated in the Hockeyapp notification email.
+    gitCommitMessage: Bumped the build number using Real CI
+    gitCommitFileList:
+    - <list of updated files to commit back to the repo>
+    credentialsPath: <path to credentials folder on local machine>
+    androidSdkPath: <path to android sdk on local machine>
+    javaKeystorePath: <path to jks file>
+    storepass: <password for jks file>
+    keystoreAlias: <alias name of jks>
+
+  tasks:
+  - task: android_create_local_properties #Create a local.properties file and writes the path of the android sdk in it
+
+  - task: android_create_apk_file #Create apk file from project
+
+  - task: android_sign_app #Sign the apk file using the jks file specified
+
+  - task: android_upload_hockeyapp #Upload the apk file to hockeyApp using the hockeyApp token specified
+
+# An example of a pipeline which runs the Sonarqube runner that reports results to a Sonarqube server
+- name: sonarqube
+  parameters:
+    gitPath: git@github.com:DeloitteDigitalAPAC/ready_ci.git
+    gitBranch: master
+    sonarHostUrl: http://localhost:9000 # Change this to the location of your Sonarqube server if it is not running the same machine
+    sonarLoginKey: d6b8060df31705a45130a0e12bae3920f3e1b3f8 # Replace this fake key with the login key generated by your Sonarqube server
+    sonarProjectKey: readyci # replace this with the project key you set on your Sonarqube server
+    sonarSourcePath: src/main/ # Use this parameter to set the path to your sourcecode
+    sonarBinaryPath: target/ # Set this parameter to the path of your compiled binaries
+    sonarBypassBuildWrapper: false # Bypass the sonar-scanner build wrapper. Default is false
+    sonarSubmitBranch: false # Submit the branch name to Sonarqube Developer Edition. Default is false
+    sonarTestsPath: src/test/ # Path to unit tests
+    sonarJavaCoveragePlugin: jacoco # name of the coverate plugin used for java tests
+    sonarJacocoReportPath: target/coverage-reports/jacoco-unit.exec # path to the coverage reports
+
+  tasks:
+  - task: maven_install # Run maven install
+
+  - task: sonarqube_runner # Run the Sonarqube runner with the parameters specified above

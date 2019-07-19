@@ -48,7 +48,7 @@ public class WebHookPresenter {
         }
 
         if (validateGitCommit(repository, branchName, gitAuthor, commitMessage)) {
-            LOGGER.info(String.format("Webhook received for repository %s and branch %s by user %s", repository, branchName, gitAuthor));
+            LOGGER.info("Webhook received for repository {} and branch {} by user {}", repository, branchName, gitAuthor);
             handleBuildRequest(repository, branchName);
         } else {
             LOGGER.warn("Webhook ignored a request which didn't contain a branch");
@@ -60,10 +60,10 @@ public class WebHookPresenter {
         List<PipelineConfiguration> pipelineConfigurations = configuration.getPipelines(repository, branch);
 
         if (pipelineConfigurations.size() > 0) {
-            LOGGER.info(String.format("Proceeding with build for %s matched pipelines", pipelineConfigurations.size()));
+            LOGGER.info("Proceeding with build for {} matched pipelines", pipelineConfigurations.size());
             runPipelines(pipelineConfigurations);
         } else {
-            LOGGER.warn(String.format("Ignoring build request for repository %s branch %s. No matching pipelines configured.", repository, branch));
+            LOGGER.warn("Ignoring build request for repository {} branch {}. No matching pipelines configured.", repository, branch);
         }
     }
 
@@ -76,12 +76,12 @@ public class WebHookPresenter {
 
     private boolean validateGitCommit(String repository, String branchName, String gitAuthor, String commitMessage) {
         if (Util.valueExists(repository) && Util.valueExists(branchName) && Util.valueExists(gitAuthor) && Util.valueExists(commitMessage)) {
-            String instanceName = ReadyCIConfiguration.instance().instanceName;
+            String instanceName = ReadyCIConfiguration.instance().getInstanceName();
             if (commitMessage.toLowerCase().contains(instanceName.toLowerCase())) {
-                LOGGER.warn(String.format("Hmmm, I recognise this GIT commit on %s for branch %s by %s, " +
+                LOGGER.warn("Hmmm, I recognise this GIT commit on {} for branch {} by {}, " +
                         "because my name is in the commit message. I'm going to ignore this " +
                         "commit to avoid cyclic builds triggered through the web-hook. " +
-                        "The commit message is %s.", repository, branchName, gitAuthor, commitMessage));
+                        "The commit message is {}.", repository, branchName, gitAuthor, commitMessage);
             } else {
                 return true;
             }

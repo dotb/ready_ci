@@ -1,8 +1,8 @@
 package com.squarepolka.readyci.configuration.parameter;
 
 public class ParsedParameter {
-    public String parameterKey;
-    public String parameterValue;
+    private String parameterKey;
+    private String parameterValue;
 
     public ParsedParameter(String parameterArgument) {
         String[] parsedParameter = parameterArgument.split("=");
@@ -12,5 +12,21 @@ public class ParsedParameter {
         } else {
             throw new ParameterParseException(parameterArgument);
         }
+    }
+
+    public String getParameterKey() {
+        return parameterKey;
+    }
+
+    public void setParameterKey(String parameterKey) {
+        this.parameterKey = parameterKey;
+    }
+
+    public String getParameterValue() {
+        return parameterValue;
+    }
+
+    public void setParameterValue(String parameterValue) {
+        this.parameterValue = parameterValue;
     }
 }

@@ -4,7 +4,7 @@ import com.squarepolka.readyci.configuration.PipelineConfiguration;
 import com.squarepolka.readyci.configuration.TaskConfiguration;
 import com.squarepolka.readyci.tasks.Task;
 import com.squarepolka.readyci.tasks.code.GitCheckout;
-import com.squarepolka.readyci.tasks.realci.ConfigurationLoad;
+import com.squarepolka.readyci.tasks.readyci.ConfigurationLoad;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -25,7 +25,7 @@ public class TaskRunnerFactory {
         BuildEnvironment buildEnvironment = new BuildEnvironment(pipelineConf);
         TaskRunner taskRunner = new TaskRunner(buildEnvironment, this);
         addDefaultTasks(taskRunner);
-        List<Task> configuredTasks = createTaskListFromConfig(pipelineConf.tasks);
+        List<Task> configuredTasks = createTaskListFromConfig(pipelineConf.getTasks());
         taskRunner.setConfiguredTasks(configuredTasks);
         return taskRunner;
     }
@@ -33,8 +33,7 @@ public class TaskRunnerFactory {
     public List<Task> createTaskListFromConfig(List<TaskConfiguration> taskConfigurations) {
         List<Task> taskList = new ArrayList<Task>();
         for (TaskConfiguration taskConfiguration : taskConfigurations) {
-            Task task = findTaskForIdentifier(taskConfiguration.task);
-            task.configure(taskConfiguration);
+            Task task = findTaskForIdentifier(taskConfiguration.getTask());
             taskList.add(task);
         }
         return taskList;

@@ -23,9 +23,9 @@ public class IOSUploadHockeyapp extends Task {
         String hockappToken = buildEnvironment.getProperty(BUILD_PROP_HOCKEYAPP_TOKEN);
         String releaseTags = buildEnvironment.getProperty(BUILD_PROP_HOCKEYAPP_RELEASE_TAGS, "");
         String releaseNotes = buildEnvironment.getProperty(BUILD_PROP_HOCKEYAPP_RELEASE_NOTES, "");
-        String appBinaryPath = String.format("%s/%s.ipa", buildEnvironment.scratchPath, scheme);
-        String dsymPath = String.format("%s/app.xcarchive/dSYMs", buildEnvironment.scratchPath);
-        String dsymPathZip = String.format("%s/app.xcarchive/dSYMs/dsym.zip", buildEnvironment.scratchPath);
+        String appBinaryPath = String.format("%s/%s.ipa", buildEnvironment.getScratchPath(), scheme);
+        String dsymPath = String.format("%s/app.xcarchive/dSYMs", buildEnvironment.getScratchPath());
+        String dsymPathZip = String.format("%s/app.xcarchive/dSYMs/dsym.zip", buildEnvironment.getScratchPath());
 
         // Zip the dSYM bundle
         executeCommand(new String[] {"zip",
@@ -46,7 +46,7 @@ public class IOSUploadHockeyapp extends Task {
             "-F", "notify=1",                   // Notify users who can install the app
             "-F", "strategy=add",               // Add the build if one with the same build number exists
             "-F", "mandatory=1"                 // Download is mandatory
-        }, buildEnvironment.scratchPath);
+        }, buildEnvironment.getScratchPath());
 
     }
 
